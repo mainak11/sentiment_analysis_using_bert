@@ -1,5 +1,4 @@
 import streamlit as st
-from textblob import TextBlob
 from process import preprocess_text, Get_sentiment
 
 def analyze_sentiment(text):
@@ -7,14 +6,7 @@ def analyze_sentiment(text):
 # print(Review)
     result = Get_sentiment(text)
     return result
-    # analysis = TextBlob(text)
-    # polarity = analysis.sentiment.polarity
-    # if polarity > 0:
-    #     return "Positive"
-    # elif polarity == 0:
-    #     return "Neutral"
-    # else:
-    #     return "Negative"
+
 
 def main():
     st.title("Sentiment Analysis App")
