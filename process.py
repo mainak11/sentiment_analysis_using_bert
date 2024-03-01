@@ -2,7 +2,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import string
-from transformers import BertTokenizer, TFBertForSequenceClassification
+from transformers import BertTokenizer, TFBertForSequenceClassification, TextClassificationPipeline
 import tensorflow as tf
 
 # Download NLTK resources (one-time step)
@@ -26,30 +26,19 @@ def preprocess_text(text):
     preprocessed_text = ' '.join(tokens)
     return preprocessed_text
 
-bert_tokenizer = BertTokenizer.from_pretrained('E:\jupyter\internship assesment\Techdome\Tokenizer')
+bert_tokenizer = BertTokenizer.from_pretrained('mainakhf/bert-base-uncased-sentiment-analysis')
  
 # Load model
-bert_model = TFBertForSequenceClassification.from_pretrained('E:\jupyter\internship assesment\Techdome\Model')
-label = {
-	1: 'positive',
-	0: 'Negative'
-}
+bert_model = TFBertForSequenceClassification.from_pretrained('mainakhf/bert-base-uncased-sentiment-analysis')
+
 
 def Get_sentiment(Review, Tokenizer=bert_tokenizer, Model=bert_model):
 	# Convert Review to a list if it's not already a list
 	if not isinstance(Review, list):
 		Review = [Review]
-
-	Input_ids, Token_type_ids, Attention_mask = Tokenizer.batch_encode_plus(Review,
-																			padding=True,
-																			truncation=True,
-																			max_length=128,
-																			return_tensors='tf').values()
-	prediction = Model.predict([Input_ids, Token_type_ids, Attention_mask])
-
-	# Use argmax along the appropriate axis to get the predicted labels
-	pred_labels = tf.argmax(prediction.logits, axis=1)
-
-	# Convert the TensorFlow tensor to a NumPy array and then to a list to get the predicted sentiment labels
-	pred_labels = [label[i] for i in pred_labels.numpy().tolist()]
-	return pred_labels
+	model = bert_model
+	model.config.id2label = {0: "Negative", 1: "Positive"} 
+	tokenizer = bert_tokenizer
+	pipe = TextClassificationPipeline(model=model, tokenizer=tokenizer)
+	pred_labels=pipe(Review)
+	return [pred_labels[0]['label']]
